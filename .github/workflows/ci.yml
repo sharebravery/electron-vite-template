@@ -3,7 +3,6 @@ name: CI
 on:
   push:
     branches:
-      - main
       - dev
   pull_request:
     branches:
@@ -71,3 +70,4 @@ jobs:
           npx vite build
         env:
           NODE_ENV: production
+

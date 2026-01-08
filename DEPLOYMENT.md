@@ -1,30 +1,30 @@
 # CI/CD 自动化部署说明
 
-本项目采用了分离的 CI/CD 流程
+本项目采用**简化的 CI/CD 流程**，**每次推送到 main 分支自动构建发布**。
+
 ## 🔄 工作流程
 
 ### CI（持续集成）
 
 触发条件：
-- 推送代码到 `main` 或 `dev` 分支
-- 创建或更新 Pull Request
+- 推送代码到 `dev` 分支
+- 创建 Pull Request 到 `main` 或 `dev`
 
 检查内容：
 - **Lint**: 代码规范检查
 - **Type Check**: TypeScript 类型检查
-- **Test Build**: 构建测试
+- **Build Check**: 前端构建验证（不打包 Electron）
 
-目的：确保代码质量，每次提交都经过验证
+目的：确保代码质量，在 dev 分支快速反馈
 
 ### CD（持续部署）
 
 触发条件：
-- 推送以 `v` 开头的 tag（如 `v1.0.0`）
-- 手动触发（GitHub Actions 页面）
+- 推送代码到 `main` 分支
 
 执行内容：
 - 多平台构建（macOS、Windows、Linux）
-- 创建 GitHub Release
+- 自动创建 GitHub Release
 - 上传构建产物
 
 ## 📦 支持的平台
@@ -35,90 +35,41 @@
 
 ## 🚀 发布流程
 
-### 1. 开发阶段
-
-在日常开发中，CI 会自动运行，确保代码质量：
+### 开发流程
 
 ```bash
+# 1. 在 dev 分支开发
+git checkout dev
 git checkout -b feature/new-feature
-# ... 编写代码 ...
+
+# 2. 开发并提交
 git add .
 git commit -m "feat: add new feature"
 git push origin feature/new-feature
+
+# 3. 创建 PR 到 dev
+# CI 会自动运行检查
 ```
 
-创建 PR 后，CI 会自动检查：
-- 代码规范
-- TypeScript 类型
-- 构建是否成功
-
-### 2. 发布版本
-
-#### 方式一：使用 release-it（推荐）
-
-使用 npm 脚本自动创建 tag 并推送：
+### 发布流程（自动化）
 
 ```bash
-# 补丁版本（0.0.0 -> 0.0.1）
-npm run release:patch
+# 1. 确保 dev 分支的代码都已合并
 
-# 次要版本（0.0.0 -> 0.1.0）
-npm run release:minor
+# 2. 将 dev 合并到 main
+git checkout main
+git merge dev
 
-# 主要版本（0.0.0 -> 1.0.0）
-npm run release:major
-
-# 交互式选择版本类型
-npm run release
-
-# 模拟运行（不实际发布）
-npm run release:dry
-```
-
-这会自动：
-1. 更新版本号
-2. 创建 Git commit
-3. 创建并推送 tag（如 `v1.0.0`）
-4. 推送到 GitHub
-
-推送 tag 后，GitHub Actions 会自动：
-1. 构建所有平台的应用
-2. 创建 GitHub Release
-3. 上传构建产物
-
-#### 方式二：手动创建 Tag
-
-```bash
-# 更新版本号
-npm version patch  # 或 minor/major
-
-# 推送代码和 tag
+# 3. 推送到 main 分支
 git push origin main
-git push origin v1.0.0
+
+# ✅ 完成！GitHub Actions 会自动：
+# 1. 构建所有平台的应用
+# 2. 创建 GitHub Release（tag: v{版本号}）
+# 3. 上传安装包到 Release
 ```
 
-#### 方式三：GitHub 手动触发
-
-1. 进入 GitHub 仓库
-2. 点击 `Actions` 标签
-3. 选择 `Release` workflow
-4. 点击 `Run workflow` 按钮
-
-## ⚙️ 配置说明
-
-### GitHub Secrets
-
-GitHub 会自动提供 `GITHUB_TOKEN`，无需手动配置。
-
-如需自定义，可在 Settings → Secrets 中添加：
-- `GITHUB_TOKEN`: GitHub Actions 自动提供
-
-### 文件说明
-
-- `.github/workflows/ci.yml` - CI 工作流（代码质量检查）
-- `.github/workflows/release.yml` - Release 工作流（构建和发布）
-- `.release-it.json` - release-it 发布工具配置
-- `electron-builder.json5` - Electron Builder 打包配置
+**就这么简单！**不需要手动打 tag 或运行任何发布命令。
 
 ## 📝 版本管理
 
@@ -129,14 +80,89 @@ GitHub 会自动提供 `GITHUB_TOKEN`，无需手动配置。
 - **MINOR** (0.1.0): 向下兼容的功能新增
 - **PATCH** (0.0.1): 向下兼容的问题修复
 
+### 更新版本号
+
+在推送到 main 之前，手动更新 `package.json` 中的版本号：
+
+```bash
+# 方式一：使用 npm version（推荐）
+npm version patch   # 0.0.0 -> 0.0.1
+npm version minor   # 0.0.0 -> 0.1.0
+npm version major   # 0.0.0 -> 1.0.0
+
+# 方式二：手动编辑
+# 修改 package.json 中的 version 字段
+```
+
+然后推送到 main：
+
+```bash
+git add package.json package-lock.json
+git commit -m "chore: bump version to 0.1.0"
+git push origin main
+```
+
 ### 发布检查清单
 
-发布前确保：
+推送到 main 前：
 - [ ] 所有测试通过
-- [ ] CI 检查通过
-- [ ] 更新了 CHANGELOG（如有）
-- [ ] 版本号正确更新
-- [ ] 本地构建测试成功
+- [ ] CI 检查通过（在 dev 分支）
+- [ ] 更新了版本号
+- [ ] 本地构建测试成功（`npm run build`）
+
+## ⚙️ 配置说明
+
+### GitHub Secrets
+
+GitHub 会自动提供 `GITHUB_TOKEN`，无需手动配置。
+
+### 文件说明
+
+- `.github/workflows/ci.yml` - CI 工作流（dev 分支代码检查）
+- `.github/workflows/release.yml` - Release 工作流（main 分支自动发布）
+- `electron-builder.json5` - Electron Builder 打包配置
+
+## 🎯 最佳实践
+
+### 推荐的开发流程
+
+```bash
+# 1. 开发阶段（在 dev 分支）
+git checkout dev
+git checkout -b feature/awesome-feature
+
+# ... 开发代码 ...
+
+git commit -m "feat: add awesome feature"
+git push origin feature/awesome-feature
+
+# 创建 PR 到 dev，等待 CI 检查通过
+# 合并到 dev
+
+# 2. 发布阶段（到 main 分支）
+git checkout main
+git merge dev
+
+# 更新版本号
+npm version minor
+
+# 推送并自动发布
+git push origin main
+
+# ✅ GitHub Actions 自动构建并发布！
+```
+
+### 分支策略
+
+- **main**: 稳定的发布版本，每次推送自动构建发布
+- **dev**: 开发分支，只运行 CI 检查
+- **feature/***: 功能分支，从 dev 分出，合并回 dev
+
+### 版本号管理建议
+
+- 每次合并到 main 发布前，更新版本号
+- 使用语义化版本号
+- 在 commit message 中说明版本变更原因
 
 ## 🔧 自定义配置
 
@@ -152,75 +178,34 @@ GitHub 会自动提供 `GITHUB_TOKEN`，无需手动配置。
 }
 ```
 
-### 修改 release-it 配置
+### 修改构建配置
 
-编辑 `.release-it.json`:
+编辑 `.github/workflows/release.yml`:
 
-```json
-{
-  "git": {
-    "commitMessage": "chore: release v${version}",
-    "requireCleanWorkingDir": true
-  },
-  "github": {
-    "release": true,
-    "draft": false,
-    "prerelease": false
-  }
-}
+```yaml
+strategy:
+  matrix:
+    os: [macos-latest, windows-latest, ubuntu-latest]
+    # 可以只构建需要的平台
 ```
 
-### 跳过 CI
+### 跳过 CI（不推荐）
 
-在提交信息中添加 `[skip ci]` 可以跳过 CI：
+在提交信息中添加 `[skip ci]`：
 
 ```bash
 git commit -m "chore: update docs [skip ci]"
 ```
 
-**注意**: 这不会跳过 tag 触发的 Release workflow。
-
-## 🎯 最佳实践
-
-1. **分支保护**
-   - 在 GitHub 设置中启用分支保护
-   - 要求 PR 通过 CI 检查才能合并
-
-2. **开发流程**
-   ```bash
-   # 1. 创建功能分支
-   git checkout -b feature/new-feature
-
-   # 2. 开发并提交
-   git commit -m "feat: add new feature"
-
-   # 3. 推送并创建 PR
-   git push origin feature/new-feature
-
-   # 4. 等待 CI 检查通过
-
-   # 5. 合并到 main 分支
-
-   # 6. 使用 release-it 发布
-   npm run release:patch
-   ```
-
-3. **版本标签**
-   - 使用语义化版本号
-   - Tag 格式：`v1.0.0`（必须以 `v` 开头）
-   - 避免在同一版本号上重复发布
-
-4. **测试**
-   - 本地充分测试后再推送 tag
-   - 使用 `npm run release:dry` 预览发布流程
+**注意**: 这不会跳过 main 分支的 Release workflow。
 
 ## 🐛 常见问题
 
 ### CI 失败怎么办？
 
 1. 查看 GitHub Actions 日志
-2. 本地运行相同的检查命令
-3. 修复问题后推送新的 commit
+2. 在 dev 分支修复问题
+3. 推送修复后确保 CI 通过再合并到 main
 
 ### 如何回滚发布？
 
@@ -233,28 +218,9 @@ git commit -m "chore: update docs [skip ci]"
 
    # 远程删除
    git push origin :refs/tags/v1.0.0
-
-   # 或使用 GitHub CLI
-   gh release delete v1.0.0
-   git push origin :refs/tags/v1.0.0
    ```
 
-3. 发布新版本修复问题
-
-### 本地发布失败？
-
-确保已安装依赖：
-
-```bash
-npm install
-```
-
-如果遇到权限问题，确保已配置 Git：
-
-```bash
-git config user.name "Your Name"
-git config user.email "your.email@example.com"
-```
+3. 修复问题，更新版本号，重新推送 main
 
 ### 如何调试 Release？
 
@@ -266,16 +232,30 @@ npm run build
 
 检查 `release/` 目录中的构建产物。
 
-### 构建太慢怎么办？
+### 如何避免每次推送都发布？
 
-- 考虑只在必要时构建所有平台
-- 修改 `.github/workflows/release.yml` 中的 matrix 配置
-- 使用 GitHub Actions 的缓存功能
+只在准备好发布时才推送到 main：
+
+```bash
+# 平时在 dev 分支开发
+git checkout dev
+git push origin dev  # 只运行 CI，不会发布
+
+# 准备好发布时才合并到 main
+git checkout main
+git merge dev
+git push origin main  # 自动构建发布
+```
+
+### 如果忘记更新版本号？
+
+如果多次推送相同版本号到 main，Release workflow 会：
+- 尝试创建已存在的 tag，导致失败
+- 解决方法：删除旧 tag 或更新版本号后重新推送
 
 ## 📚 相关链接
 
 - [GitHub Actions 文档](https://docs.github.com/en/actions)
-- [release-it 文档](https://github.com/release-it/release-it)
 - [Electron Builder 文档](https://www.electron.build/)
 - [语义化版本](https://semver.org/lang/zh-CN/)
 
@@ -295,28 +275,13 @@ npm run dev
 # 4. 测试构建
 npm run build
 
-# 5. 提交代码
-git add .
-git commit -m "feat: initial release"
-git push origin main
-
-# 6. 发布版本
-npm run release:patch
-```
-
-## Release
-```bash
-# 1. 推送 dev 的更改
-git push origin dev
-
-# 2. 切换到 main 并合并 dev
+# 5. 发布
 git checkout main
 git merge dev
+npm version patch
+git push origin main
 
-# 3. 在 main 分支发布
-npm run release:minor
-
-# 4. 推送 tag 触发 Release
-git push origin main --tags
+# ✅ 自动构建并发布！
 ```
-推送 tag 后，GitHub Actions 会自动构建并发布！
+
+**推送到 main 分支即自动发布，无需额外操作！**
