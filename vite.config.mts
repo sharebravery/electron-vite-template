@@ -20,6 +20,9 @@ export default defineConfig({
       '~': path.resolve(__dirname, 'electron'),
     }
   },
+  build: {
+    chunkSizeWarningLimit: 1000,
+  },
 
   plugins: [
     Unocss(),
@@ -81,6 +84,7 @@ export default defineConfig({
         entry: 'electron/main.ts',
         vite: {
           build: {
+            chunkSizeWarningLimit: 1000,
             rollupOptions: {
               external: [
                 'app-root-path',
