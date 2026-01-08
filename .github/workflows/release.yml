@@ -15,14 +15,12 @@ jobs:
 
     strategy:
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-latest]
+        os: [macos-latest, windows-latest]
         include:
           - os: macos-latest
             platform: mac
           - os: windows-latest
             platform: windows
-          - os: ubuntu-latest
-            platform: linux
 
     steps:
       - name: Checkout code
@@ -51,12 +49,6 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build (Linux)
-        if: matrix.os == 'ubuntu-latest'
-        run: npm run build
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Upload artifacts (macOS)
         if: matrix.os == 'macos-latest'
         uses: actions/upload-artifact@v4
@@ -71,14 +63,6 @@ jobs:
         with:
           name: windows-build
           path: release/**/*.exe
-          retention-days: 7
-
-      - name: Upload artifacts (Linux)
-        if: matrix.os == 'ubuntu-latest'
-        uses: actions/upload-artifact@v4
-        with:
-          name: linux-build
-          path: release/**/*.AppImage
           retention-days: 7
 
   release:
@@ -109,7 +93,6 @@ jobs:
           files: |
             release/macos-build/**/*.dmg
             release/windows-build/**/*.exe
-            release/linux-build/**/*.AppImage
           draft: false
           prerelease: false
           generate_release_notes: true

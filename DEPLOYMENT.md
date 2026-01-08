@@ -23,7 +23,7 @@
 - 推送代码到 `main` 分支
 
 执行内容：
-- 多平台构建（macOS、Windows、Linux）
+- 多平台构建（macOS、Windows）
 - 自动创建 GitHub Release
 - 上传构建产物
 
@@ -31,7 +31,6 @@
 
 - **macOS**: DMG 安装包
 - **Windows**: NSIS 安装程序
-- **Linux**: AppImage 可执行文件
 
 ## 🚀 发布流程
 
