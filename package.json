@@ -4,6 +4,7 @@
   "version": "0.1.0",
   "main": "dist-electron/main.js",
   "scripts": {
+    "setup": "node scripts/setup.js",
     "dev": "vite",
     "build": "vue-tsc && vite build && electron-builder",
     "preview": "vite preview",

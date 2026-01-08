@@ -1,118 +1,289 @@
-# electron-vite-template
+# ⚡ Electron + Vite + Vue3 + TypeScript
 
-## 项目亮点
+<p align="center">
+  <img src="./logo.png" width="200" alt="logo">
+</p>
 
-- ⚡ 基于 Electron + Vite + Vue3 + TypeScript 的现代桌面应用开发模板
-- 🛠️ 后端服务（主进程）采用装饰器自动注册，前端 API 自动生成，前后端类型强关联
-- 🗃️ 集成 TypeORM，支持 SQL 查询与实体表格自动生成
-- 📦 现代前端工程体系，支持热更新、类型推断、自动导入
-- 🧩 代码结构清晰，易于扩展和维护
-- 🖥️ 支持多窗口管理，适合复杂桌面应用开发
+<p align="center">
+  现代化 Electron 桌面应用开发模板 | 类型安全 | 开箱即用
+</p>
 
----
-
-## 目录结构
-
-```
-electron-vite-template/
-├─ electron/           # Electron 主进程相关代码
-│  ├─ db/              # 数据库相关（实体、数据源、工具等）
-│  ├─ services/        # 主进程服务（如窗口、用户、图书等，支持自动注册）
-│  ├─ main.ts          # 主进程入口
-│  └─ preload.ts       # 预加载脚本
-├─ src/                # 渲染进程（前端）代码
-│  ├─ api/             # 自动生成的前端 API
-│  ├─ components/      # Vue 组件
-│  ├─ pages/           # 页面
-│  └─ main.ts          # 前端入口
-├─ public/             # 静态资源
-├─ gen_api.ts          # API 自动生成脚本
-├─ package.json        # 项目依赖与脚本
-└─ README.md           # 项目说明
-```
+<p align="center">
+  <a href="https://github.com/<your-username>/electron-vite-template/stargazers"><img src="https://img.shields.io/github/stars/<your-username>/electron-vite-template" alt="Stars"></a>
+  <a href="https://github.com/<your-username>/electron-vite-template/issues"><img src="https://img.shields.io/github/issues/<your-username>/electron-vite-template" alt="Issues"></a>
+  <a href="./LICENSE"><img src="https://img.shields.io/github/license/<your-username>/electron-vite-template" alt="License"></a>
+</p>
 
 ---
 
-## 后端服务封装（@/electron/services）
+## ✨ 特性
 
-- 所有主进程服务统一放在 `electron/services/` 目录下。
-- 通过装饰器（如 `@IpcHandle`、`@IpcOn`、`@IpcOnce`）自动注册 IPC 通信方法。
-- 只需在服务类中为方法添加装饰器，即可自动暴露给前端调用，无需手动注册。
+- ⚡ **Electron 30** + **Vite 5** - 极速的开发体验
+- 🎨 **Vue 3** + **TypeScript** - 现代化的前端技术栈
+- 🛠️ **装饰器自动注册** - 后端服务自动暴露给前端
+- 🔗 **API 自动生成** - 类型安全的 IPC 通信
+- 🗃️ **TypeORM** + **Better-SQLite3** - 强大的数据库支持
+- 🧩 **组件自动导入** - 无需手动 import 组件
+- 🎯 **路由自动生成** - 基于文件结构的路由
+- 🚀 **CI/CD 自动化** - 推送即发布
+- 📦 **多平台构建** - 支持 macOS、Windows
 
-示例（`electron/services/BookService.ts`）：
+---
 
-```ts
-import { IpcHandle } from '装饰器路径';
+## 🚀 快速开始
 
-export class BookService {
+### 使用模板
+
+点击 GitHub 页面的 **"Use this template"** 按钮，创建你的仓库：
+
+```bash
+# 1. 克隆你的新仓库
+git clone https://github.com/<your-username>/<your-repo>.git
+cd <your-repo>
+
+# 2. 安装依赖
+npm install
+
+# 3. 启动开发服务器
+npm run dev
+```
+
+### 自定义配置
+
+修改以下文件以适配你的项目：
+
+1. **`electron-builder.json5`** - 应用配置
+   ```json5
+   {
+     appId: "com.yourcompany.yourapp",  // 修改为你的 App ID
+     productName: "Your App Name",       // 修改为应用名称
+   }
+   ```
+
+2. **`package.json`** - 项目信息
+   ```json
+   {
+     "name": "your-app-name",  // 修改为你的应用名称
+   }
+   ```
+
+3. **图标文件**
+   - 替换 `public/icon.ico` (Windows)
+   - 替换 `public/logo.png` (通用)
+
+---
+
+## 📚 核心功能
+
+### 1. 后端服务自动注册
+
+```typescript
+// electron/services/UserService.ts
+import { IpcHandle } from './decorators'
+
+export class UserService {
   @IpcHandle
-  async getBooks() {
-    // 查询数据库并返回
+  async getUsers() {
+    // 直接返回数据，自动暴露给前端
+    return [{ id: 1, name: 'John' }]
   }
+}
+```
+
+### 2. 前端自动生成 API
+
+```vue
+<script setup lang="ts">
+import { api } from '@/api'
+
+// 类型安全的调用，支持自动补全
+const users = await api.UserService.getUsers()
+</script>
+```
+
+### 3. 数据库操作
+
+```typescript
+// electron/db/entities/User.ts
+import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm'
+
+@Entity()
+export class User {
+  @PrimaryGeneratedColumn()
+  id: number
+
+  @Column()
+  name: string
 }
 ```
 
 ---
 
-## API 自动生成与使用
+## 📁 项目结构
 
-### 1. API 自动生成
-
-- 开发环境下，Vite 插件会自动扫描 `electron/services/` 目录下所有带装饰器的方法，自动生成类型安全的前端 API 封装，输出到 `src/api/index.ts`，无需手动执行命令。
-
-### 2. 前端调用方式
-
-- 直接在前端通过 `api` 对象调用，无需手动维护 IPC 通信代码。
-
-示例（`src/pages/index.vue`）：
-
-```ts
-import { api } from '@/api';
-
-const books = await api.BookService.getBooks();
 ```
-
-- 支持类型推断和自动补全，开发体验极佳。
+.
+├── electron/              # Electron 主进程
+│   ├── db/                # 数据库配置和实体
+│   │   ├── entities/      # TypeORM 实体
+│   │   └── data-source.ts # 数据源配置
+│   ├── services/          # 后端服务（自动注册）
+│   ├── main.ts            # 主进程入口
+│   └── preload.ts         # 预加载脚本
+├── src/                   # 渲染进程（前端）
+│   ├── api/               # 自动生成的 API（勿手动修改）
+│   ├── pages/             # 页面组件
+│   ├── components/        # 通用组件
+│   └── main.ts            # 前端入口
+├── public/                # 静态资源
+├── .github/               # GitHub Actions CI/CD
+│   └── workflows/         # 自动化工作流
+├── gen_api.ts             # API 生成脚本
+└── electron-builder.json5 # 打包配置
+```
 
 ---
 
-## 快速开始
-
-### 1. 安装依赖
+## 🛠️ 开发命令
 
 ```bash
-npm install
-```
-
-### 2. 启动开发环境
-
-```bash
+# 开发
 npm run dev
+
+# 构建前端（不打包 Electron）
+npm run build:renderer
+
+# 完整构建（前端 + Electron）
+npm run build
+
+# 数据库迁移
+npm run migration:generate   # 生成迁移文件
+npm run migration:run        # 执行迁移
+npm run migration:revert     # 回滚迁移
 ```
 
-- 启动后会自动打开 Electron 应用窗口，支持热更新。
+---
 
-### 3. 打包应用
+## 📦 自动发布
+
+### 分支策略
+
+- **`main`** - 稳定版本，每次推送自动构建发布
+- **`dev`** - 开发分支，只运行 CI 检查
+
+### 发布流程
 
 ```bash
-npm run build
+# 1. 在 dev 分支开发
+git checkout dev
+git checkout -b feature/new-feature
+
+# 2. 开发并提交
+git add .
+git commit -m "feat: add new feature"
+git push origin feature/new-feature
+
+# 3. 合并到 dev，通过 CI 检查
+
+# 4. 发布到 main
+git checkout main
+git merge dev
+npm version patch  # 更新版本号
+git push origin main
+
+# ✅ GitHub Actions 自动构建并发布！
 ```
 
-- 构建生产环境包，输出到 `dist` 和 `dist-electron` 目录。
+详细说明请查看 [DEPLOYMENT.md](./DEPLOYMENT.md)
 
 ---
 
-## 推荐开发环境
+## 🎨 技术栈
 
-- VS Code + Volar 插件（建议禁用 Vetur）
-- 启用 Volar 的 Take Over Mode，获得更佳的 TypeScript 支持体验
+### 前端
+- **Vue 3.5** - 渐进式 JavaScript 框架
+- **TypeScript 5.8** - 类型安全
+- **Vite 5** - 新一代前端构建工具
+- **Vue Router 4** - 官方路由
+- **Pinia** - 状态管理
+- **Ant Design Vue** - UI 组件库
+- **UnoCSS** - 原子化 CSS
+- **unplugin-auto-import** - API 自动导入
+- **unplugin-vue-components** - 组件自动导入
+
+### 后端
+- **Electron 30** - 跨平台桌面应用
+- **TypeORM 0.3** - ORM 框架
+- **Better-SQLite3** - SQLite 数据库
+- **Electron Builder** - 应用打包
+
+### 开发工具
+- **Vue TSC** - TypeScript 类型检查
+- **ESLint** - 代码检查
+- **GitHub Actions** - CI/CD
 
 ---
 
-## 其他
+## 🔧 配置说明
 
-如需自定义数据库、接口或页面，可参考 `electron/db` 和 `src/api` 目录下的示例进行扩展。
+### 修改应用名称和图标
+
+1. **应用名称**
+   ```bash
+   # electron-builder.json5
+   productName: "Your App Name"
+
+   # package.json
+   "name": "your-app-name"
+   ```
+
+2. **应用图标**
+   - Windows: `public/icon.ico`
+   - macOS: `public/icon.icns` (需要自己生成)
+   - 通用: `public/logo.png`
+
+### 修改数据库
+
+编辑 `electron/db/data-source.ts`：
+
+```typescript
+export const AppDataSource = new DataSource({
+  type: "better-sqlite3",
+  database: "your_database.db",  // 修改数据库名
+  entities: [User, YourEntity],   // 添加你的实体
+  synchronize: true,
+})
+```
 
 ---
 
-如需进一步完善或有特殊说明需求，请补充具体细节！
+## 📖 学习资源
+
+- [Electron 官方文档](https://www.electronjs.org/docs)
+- [Vue 3 官方文档](https://cn.vuejs.org/)
+- [TypeORM 文档](https://typeorm.biunav.com/)
+- [Vite 配置指南](https://cn.vitejs.dev/config/)
+
+---
+
+## 🤝 贡献
+
+欢迎提交 Issue 和 Pull Request！
+
+---
+
+## 📄 许可证
+
+[MIT](./LICENSE)
+
+---
+
+## 💖 致谢
+
+感谢所有开源项目的作者！
+
+---
+
+<div align="center">
+  <sub>Built with ❤️ by <a href="https://github.com/<your-username>"><your-username></a></sub>
+</div>
