@@ -304,4 +304,19 @@ git push origin main
 npm run release:patch
 ```
 
+## Release
+```bash
+# 1. 推送 dev 的更改
+git push origin dev
+
+# 2. 切换到 main 并合并 dev
+git checkout main
+git merge dev
+
+# 3. 在 main 分支发布
+npm run release:minor
+
+# 4. 推送 tag 触发 Release
+git push origin main --tags
+```
 推送 tag 后，GitHub Actions 会自动构建并发布！
