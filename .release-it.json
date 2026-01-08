@@ -1,0 +1,41 @@
+{
+  "git": {
+    "commitMessage": "chore: release v${version}",
+    "commit": true,
+    "tag": true,
+    "push": true,
+    "requireCleanWorkingDir": true
+  },
+  "npm": {
+    "publish": false,
+    "versionArgs": ["--no-git-tag-version"]
+  },
+  "github": {
+    "release": true,
+    "releaseName": "v${version}",
+    "assets": [
+      "release/${version}/*.dmg",
+      "release/${version}/*.exe",
+      "release/${version}/*.AppImage"
+    ],
+    "draft": false,
+    "prerelease": false
+  },
+  "hooks": {
+    "before:init": ["npm run build"],
+    "after:bump": [
+      "npm run build"
+    ],
+    "after:release": [
+      "echo Successfully released v${version}! 🎉"
+    ]
+  },
+  "plugins": {
+    "@release-it/bumper": {
+      "out": [
+        { "file": "package.json", "type": "json" },
+        { "file": "electron-builder.json5", "type": "json" }
+      ]
+    }
+  }
+}

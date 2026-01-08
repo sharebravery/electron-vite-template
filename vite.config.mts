@@ -97,11 +97,14 @@ export default defineConfig({
                 'pg-query-stream',
                 'redis',
                 'better-sqlite3',
+                'sqlite3',
                 'sql.js',
                 'mariadb',
                 'ioredis',
                 'nativescript-sqlite',
                 'typeorm-aurora-data-api-driver',
+                '@google-cloud/spanner',
+                '@vscode/sqlite3',
               ],
             }
           }
